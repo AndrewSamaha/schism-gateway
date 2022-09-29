@@ -1,0 +1,163 @@
+schema
+  @link(url: "https://specs.apollo.dev/link/v1.0")
+  @link(url: "https://specs.apollo.dev/join/v0.2", for: EXECUTION)
+{
+  query: Query
+  mutation: Mutation
+}
+
+directive @join__field(graph: join__Graph!, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
+
+directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
+
+type Chunk
+  @join__type(graph: FILMS)
+{
+  x: Int!
+  y: Int!
+  tiles: [Tile]!
+}
+
+type ChunkCollection
+  @join__type(graph: FILMS)
+{
+  chunkSize: Int
+  chunks: [Chunk]!
+  stateTimeUTC: String
+  queryDuration: Int
+}
+
+type ErrorAuthentication
+  @join__type(graph: FILMS)
+{
+  message: String
+}
+
+"""Return type for creating a player when one already exists"""
+type ErrorPlayerAlreadyExists
+  @join__type(graph: FILMS)
+{
+  message: String
+}
+
+type GameState
+  @join__type(graph: FILMS)
+{
+  position: Position
+}
+
+union GenerateAuthTokenResponse
+  @join__type(graph: FILMS)
+ = Player | ErrorAuthentication
+
+scalar join__FieldSet
+
+enum join__Graph {
+  FILMS @join__graph(name: "films", url: "http://localhost:4010")
+}
+
+scalar link__Import
+
+enum link__Purpose {
+  """
+  `SECURITY` features provide metadata necessary to securely resolve fields.
+  """
+  SECURITY
+
+  """
+  `EXECUTION` features provide metadata necessary for operation execution.
+  """
+  EXECUTION
+}
+
+type Mutation
+  @join__type(graph: FILMS)
+{
+  """Create a player"""
+  createPlayer(name: String!, password: String!): PlayerResponse
+
+  """Try to generate an auth token by testing a password"""
+  login(name: String!, password: String!): GenerateAuthTokenResponse
+}
+
+"""A player"""
+type Player
+  @join__type(graph: FILMS)
+{
+  id: ID!
+  name: String
+  gameState: GameState
+  authToken: String
+  password: String
+}
+
+"""Return type for when attempting to create a new player"""
+union PlayerResponse
+  @join__type(graph: FILMS)
+ = Player | ErrorPlayerAlreadyExists
+
+type Position
+  @join__type(graph: FILMS)
+{
+  x: Float
+  y: Float
+  z: Float
+}
+
+input PositionInput
+  @join__type(graph: FILMS)
+{
+  x: Int!
+  y: Int!
+}
+
+type Query
+  @join__type(graph: FILMS)
+{
+  """Returns a list of all players"""
+  getAllPlayers: [Player]
+
+  """Returns a player by its ID"""
+  getPlayerById(id: ID!): Player
+  getAllTiles: [Tile]!
+  getTile(x: Int!, y: Int!): Tile
+  getTilesNear(positions: [PositionInput]!, range: Int!): [Tile]! @deprecated(reason: "Use 'getChunk' instead'.")
+  getWorldState(positions: [PositionInput]!, range: Int!): WorldState!
+  getChunk(positions: [PositionInput]!, chunkSize: Int!): WorldState!
+  getChunkCollection(positions: [PositionInput]!, chunkSize: Int!): ChunkCollection!
+}
+
+"""A tile"""
+type Tile
+  @join__type(graph: FILMS)
+{
+  id: ID!
+  x: Int!
+  y: Int!
+  TileType: TileType
+}
+
+"""A TypeTYpe"""
+type TileType
+  @join__type(graph: FILMS)
+{
+  id: ID
+  type: String!
+}
+
+"""For queries that return information about the world state"""
+type WorldState
+  @join__type(graph: FILMS)
+{
+  tiles: [Tile]!
+  position: [Position]
+  stateTimeUTC: String
+  range: Int
+  chunkSize: Int
+}

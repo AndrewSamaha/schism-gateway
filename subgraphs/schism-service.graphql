@@ -1,0 +1,100 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+scalar _FieldSet
+scalar _Any
+"A player"
+type Player {
+  id: ID!
+  name: String
+  gameState: GameState
+  authToken: String
+  password: String
+}
+"Return type for creating a player when one already exists"
+type ErrorPlayerAlreadyExists {
+  message: String
+}
+type Mutation {
+  "Create a player"
+  createPlayer(name: String!, password: String!): PlayerResponse
+  "Try to generate an auth token by testing a password"
+  login(name: String!, password: String!): GenerateAuthTokenResponse
+}
+type Query {
+  "Returns a list of all players"
+  getAllPlayers: [Player]
+  "Returns a player by its ID"
+  getPlayerById(id: ID!): Player
+  getAllTiles: [Tile]!
+  getTile(x: Int!, y: Int!): Tile
+  getTilesNear(positions: [PositionInput]!, range: Int!): [Tile]! @deprecated(reason: "Use 'getChunk' instead'.")
+  getWorldState(positions: [PositionInput]!, range: Int!): WorldState!
+  getChunk(positions: [PositionInput]!, chunkSize: Int!): WorldState!
+  getChunkCollection(positions: [PositionInput]!, chunkSize: Int!): ChunkCollection!
+  _service: _Service!
+}
+type ErrorAuthentication {
+  message: String
+}
+type GameState {
+  position: Position
+}
+type Position {
+  x: Float
+  y: Float
+  z: Float
+}
+"A TypeTYpe"
+type TileType {
+  id: ID
+  type: String!
+}
+"A tile"
+type Tile {
+  id: ID!
+  x: Int!
+  y: Int!
+  TileType: TileType
+}
+type Chunk {
+  x: Int!
+  y: Int!
+  tiles: [Tile]!
+}
+"For queries that return information about the world state"
+type WorldState {
+  tiles: [Tile]!
+  position: [Position]
+  stateTimeUTC: String
+  range: Int
+  chunkSize: Int
+}
+type ChunkCollection {
+  chunkSize: Int
+  chunks: [Chunk]!
+  stateTimeUTC: String
+  queryDuration: Int
+}
+type _Service {
+  sdl: String
+}
+"Return type for when attempting to create a new player"
+union PlayerResponse = Player | ErrorPlayerAlreadyExists
+union GenerateAuthTokenResponse = Player | ErrorAuthentication
+input PositionInput {
+  x: Int!
+  y: Int!
+}
+directive @key(fields: _FieldSet!, resolvable: Boolean = true) on OBJECT | INTERFACE
+directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
+directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
+directive @extends on OBJECT | INTERFACE
+directive @external(reason: String) on OBJECT | FIELD_DEFINITION
+directive @tag(name: String!) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION | ARGUMENT_DEFINITION | SCALAR | ENUM | ENUM_VALUE | INPUT_OBJECT | INPUT_FIELD_DEFINITION
+"Exposes a URL that specifies the behavior of this scalar."
+directive @specifiedBy(
+    "The URL that specifies the behavior of this scalar."
+    url: String!
+  ) on SCALAR

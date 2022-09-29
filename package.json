@@ -1,0 +1,22 @@
+{
+  "name": "schism-gateway",
+  "version": "1.0.0",
+  "description": "GraphQL gateway",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "rover": "npx -p @apollo/rover rover",
+    "clean": "rm ./subgraphs/* && rm ./supergraph/prod-schema.graphql",
+    "export:subgraph": "dotenv rover -- graph introspect http://localhost:4010 > ./subgraphs/schism-service.graphql",
+    "compose": "dotenv rover -- supergraph compose --config ./supergraph/supergraph.yaml > ./supergraph/prod-schema.graphql",
+    "start": "./router --config ./router.yaml --supergraph ./supergraph/prod-schema.graphql",
+    "start:dev": "./router --dev --config ./router.yaml --supergraph ./supergraph/prod-schema.graphql"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@apollo/rover": "^0.9.0",
+    "dotenv": "^16.0.2",
+    "dotenv-cli": "^6.0.0"
+  }
+}
