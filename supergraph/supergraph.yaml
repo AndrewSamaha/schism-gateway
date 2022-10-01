@@ -1,6 +1,10 @@
 federation_version: 2
 subgraphs:
-  films:
+  schism-service:
     routing_url: http://localhost:4010
     schema:
       file: ../subgraphs/schism-service.graphql
+  schism-entity:
+    routing_url: http://localhost:4011
+    schema:
+      file: ../subgraphs/schism-entity.graphql

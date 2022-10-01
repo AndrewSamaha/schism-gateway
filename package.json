@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "rover": "npx -p @apollo/rover rover",
     "clean": "rm ./subgraphs/* && rm ./supergraph/prod-schema.graphql",
-    "export:subgraph": "dotenv rover -- graph introspect http://localhost:4010 > ./subgraphs/schism-service.graphql",
+    "import:subgraph:service": "dotenv rover -- graph introspect http://localhost:4010 > ./subgraphs/schism-service.graphql",
+    "import:subgraph:entity": "dotenv rover -- graph introspect http://localhost:4011 > ./subgraphs/schism-entity.graphql",
+    "import:all:compose": "dotenv rover -- graph introspect http://localhost:4010 > ./subgraphs/schism-service.graphql && dotenv rover -- graph introspect http://localhost:4011 > ./subgraphs/schism-entity.graphql && dotenv rover -- supergraph compose --config ./supergraph/supergraph.yaml > ./supergraph/prod-schema.graphql",
     "compose": "dotenv rover -- supergraph compose --config ./supergraph/supergraph.yaml > ./supergraph/prod-schema.graphql",
     "start": "./router --config ./router.yaml --supergraph ./supergraph/prod-schema.graphql",
     "start:dev": "./router --dev --config ./router.yaml --supergraph ./supergraph/prod-schema.graphql"

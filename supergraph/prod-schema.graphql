@@ -17,15 +17,16 @@ directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boole
 directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
 
 type Chunk
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_SERVICE)
 {
-  x: Int!
-  y: Int!
-  tiles: [Tile]!
+  id: ID
+  x: Int
+  y: Int
+  tiles: [Tile]
 }
 
 type ChunkCollection
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_SERVICE)
 {
   chunkSize: Int
   chunks: [Chunk]!
@@ -33,33 +34,53 @@ type ChunkCollection
   queryDuration: Int
 }
 
+input ChunkInput
+  @join__type(graph: SCHISM_ENTITY)
+{
+  x: Int!
+  y: Int!
+}
+
+type Entity
+  @join__type(graph: SCHISM_ENTITY)
+{
+  id: ID
+  name: String
+  longName: String
+  speed: Float
+  ownerId: String
+  position: Position
+  color: String
+}
+
 type ErrorAuthentication
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_SERVICE)
 {
   message: String
 }
 
 """Return type for creating a player when one already exists"""
 type ErrorPlayerAlreadyExists
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_SERVICE)
 {
   message: String
 }
 
 type GameState
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_SERVICE)
 {
   position: Position
 }
 
 union GenerateAuthTokenResponse
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_SERVICE)
  = Player | ErrorAuthentication
 
 scalar join__FieldSet
 
 enum join__Graph {
-  FILMS @join__graph(name: "films", url: "http://localhost:4010")
+  SCHISM_ENTITY @join__graph(name: "schism-entity", url: "http://localhost:4011")
+  SCHISM_SERVICE @join__graph(name: "schism-service", url: "http://localhost:4010")
 }
 
 scalar link__Import
@@ -77,7 +98,7 @@ enum link__Purpose {
 }
 
 type Mutation
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_SERVICE)
 {
   """Create a player"""
   createPlayer(name: String!, password: String!): PlayerResponse
@@ -88,7 +109,7 @@ type Mutation
 
 """A player"""
 type Player
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_SERVICE)
 {
   id: ID!
   name: String
@@ -99,11 +120,12 @@ type Player
 
 """Return type for when attempting to create a new player"""
 union PlayerResponse
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_SERVICE)
  = Player | ErrorPlayerAlreadyExists
 
 type Position
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_ENTITY)
+  @join__type(graph: SCHISM_SERVICE)
 {
   x: Float
   y: Float
@@ -111,31 +133,37 @@ type Position
 }
 
 input PositionInput
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_ENTITY)
+  @join__type(graph: SCHISM_SERVICE)
 {
-  x: Int!
-  y: Int!
+  x: Float
+  y: Float
 }
 
 type Query
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_ENTITY)
+  @join__type(graph: SCHISM_SERVICE)
 {
+  getEntityById(id: ID!): Entity @join__field(graph: SCHISM_ENTITY)
+  getEntitiesInChunk(chunk: ChunkInput!): [Entity]! @join__field(graph: SCHISM_ENTITY)
+  getEntitiesByOwner(ownerId: ID!): [Entity]! @join__field(graph: SCHISM_ENTITY)
+
   """Returns a list of all players"""
-  getAllPlayers: [Player]
+  getAllPlayers: [Player] @join__field(graph: SCHISM_SERVICE)
 
   """Returns a player by its ID"""
-  getPlayerById(id: ID!): Player
-  getAllTiles: [Tile]!
-  getTile(x: Int!, y: Int!): Tile
-  getTilesNear(positions: [PositionInput]!, range: Int!): [Tile]! @deprecated(reason: "Use 'getChunk' instead'.")
-  getWorldState(positions: [PositionInput]!, range: Int!): WorldState!
-  getChunk(positions: [PositionInput]!, chunkSize: Int!): WorldState!
-  getChunkCollection(positions: [PositionInput]!, chunkSize: Int!): ChunkCollection!
+  getPlayerById(id: ID!): Player @join__field(graph: SCHISM_SERVICE)
+  getAllTiles: [Tile]! @join__field(graph: SCHISM_SERVICE)
+  getTile(x: Int!, y: Int!): Tile @join__field(graph: SCHISM_SERVICE)
+  getTilesNear(positions: [PositionInput]!, range: Int!): [Tile]! @join__field(graph: SCHISM_SERVICE) @deprecated(reason: "Use 'getChunk' instead'.")
+  getWorldState(positions: [PositionInput]!, range: Int!): WorldState! @join__field(graph: SCHISM_SERVICE)
+  getChunk(positions: [PositionInput]!, chunkSize: Int!): WorldState! @join__field(graph: SCHISM_SERVICE)
+  getChunkCollection(positions: [PositionInput]!, chunkSize: Int!): ChunkCollection! @join__field(graph: SCHISM_SERVICE)
 }
 
 """A tile"""
 type Tile
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_SERVICE)
 {
   id: ID!
   x: Int!
@@ -145,7 +173,7 @@ type Tile
 
 """A TypeTYpe"""
 type TileType
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_SERVICE)
 {
   id: ID
   type: String!
@@ -153,7 +181,7 @@ type TileType
 
 """For queries that return information about the world state"""
 type WorldState
-  @join__type(graph: FILMS)
+  @join__type(graph: SCHISM_SERVICE)
 {
   tiles: [Tile]!
   position: [Position]
