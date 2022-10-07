@@ -53,6 +53,18 @@ type Entity
   color: String
 }
 
+input EntityInput
+  @join__type(graph: SCHISM_ENTITY)
+{
+  id: ID!
+  name: String
+  longName: String
+  speed: Float
+  ownerId: String
+  position: PositionInput
+  color: String
+}
+
 type ErrorAuthentication
   @join__type(graph: SCHISM_SERVICE)
 {
@@ -98,13 +110,18 @@ enum link__Purpose {
 }
 
 type Mutation
+  @join__type(graph: SCHISM_ENTITY)
   @join__type(graph: SCHISM_SERVICE)
 {
+  updateEntity(entity: EntityInput!): Boolean @join__field(graph: SCHISM_ENTITY)
+  insertEntity(entity: EntityInput!): Boolean @join__field(graph: SCHISM_ENTITY)
+  upsertEntities(entities: [EntityInput]!): [Boolean] @join__field(graph: SCHISM_ENTITY)
+
   """Create a player"""
-  createPlayer(name: String!, password: String!): PlayerResponse
+  createPlayer(name: String!, password: String!): PlayerResponse @join__field(graph: SCHISM_SERVICE)
 
   """Try to generate an auth token by testing a password"""
-  login(name: String!, password: String!): GenerateAuthTokenResponse
+  login(name: String!, password: String!): GenerateAuthTokenResponse @join__field(graph: SCHISM_SERVICE)
 }
 
 """A player"""
@@ -144,9 +161,13 @@ type Query
   @join__type(graph: SCHISM_ENTITY)
   @join__type(graph: SCHISM_SERVICE)
 {
-  getEntityById(id: ID!): Entity @join__field(graph: SCHISM_ENTITY)
+  getEntityById(id: ID!): [Entity]! @join__field(graph: SCHISM_ENTITY)
   getEntitiesInChunk(chunk: ChunkInput!): [Entity]! @join__field(graph: SCHISM_ENTITY)
   getEntitiesByOwner(ownerId: ID!): [Entity]! @join__field(graph: SCHISM_ENTITY)
+  getEntitiesNearPosition(position: PositionInput!, range: Int): [Entity]! @join__field(graph: SCHISM_ENTITY)
+  getAllEntities: [Entity]! @join__field(graph: SCHISM_ENTITY)
+  getMyEntities: [Entity]! @join__field(graph: SCHISM_ENTITY)
+  getEntitiesICanSee: [Entity]! @join__field(graph: SCHISM_ENTITY)
 
   """Returns a list of all players"""
   getAllPlayers: [Player] @join__field(graph: SCHISM_SERVICE)

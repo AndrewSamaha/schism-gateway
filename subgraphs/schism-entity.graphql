@@ -1,3 +1,7 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
 scalar link__Import
 scalar federation__FieldSet
 scalar _Any
@@ -10,10 +14,19 @@ type Entity {
   position: Position
   color: String
 }
+type Mutation {
+  updateEntity(entity: EntityInput!): Boolean
+  insertEntity(entity: EntityInput!): Boolean
+  upsertEntities(entities: [EntityInput]!): [Boolean]
+}
 type Query {
-  getEntityById(id: ID!): Entity
+  getEntityById(id: ID!): [Entity]!
   getEntitiesInChunk(chunk: ChunkInput!): [Entity]!
   getEntitiesByOwner(ownerId: ID!): [Entity]!
+  getEntitiesNearPosition(position: PositionInput!, range: Int): [Entity]!
+  getAllEntities: [Entity]!
+  getMyEntities: [Entity]!
+  getEntitiesICanSee: [Entity]!
   _service: _Service!
 }
 type Position {
@@ -29,6 +42,15 @@ enum link__Purpose {
   SECURITY
   "`EXECUTION` features provide metadata necessary for operation execution."
   EXECUTION
+}
+input EntityInput {
+  id: ID!
+  name: String
+  longName: String
+  speed: Float
+  ownerId: String
+  position: PositionInput
+  color: String
 }
 input PositionInput {
   x: Float
