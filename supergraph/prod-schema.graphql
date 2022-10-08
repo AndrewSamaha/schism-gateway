@@ -116,6 +116,7 @@ type Mutation
   updateEntity(entity: EntityInput!): Boolean @join__field(graph: SCHISM_ENTITY)
   insertEntity(entity: EntityInput!): Boolean @join__field(graph: SCHISM_ENTITY)
   upsertEntities(entities: [EntityInput]!): [Boolean] @join__field(graph: SCHISM_ENTITY)
+  upsertMyEntities(entities: [EntityInput]!): [Boolean] @join__field(graph: SCHISM_ENTITY)
 
   """Create a player"""
   createPlayer(name: String!, password: String!): PlayerResponse @join__field(graph: SCHISM_SERVICE)

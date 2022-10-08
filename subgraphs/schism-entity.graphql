@@ -18,6 +18,7 @@ type Mutation {
   updateEntity(entity: EntityInput!): Boolean
   insertEntity(entity: EntityInput!): Boolean
   upsertEntities(entities: [EntityInput]!): [Boolean]
+  upsertMyEntities(entities: [EntityInput]!): [Boolean]
 }
 type Query {
   getEntityById(id: ID!): [Entity]!
