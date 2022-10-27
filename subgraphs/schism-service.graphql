@@ -12,6 +12,7 @@ type Player {
   gameState: GameState
   authToken: String
   password: String
+  userGroups: [String]!
 }
 "Return type for creating a player when one already exists"
 type ErrorPlayerAlreadyExists {

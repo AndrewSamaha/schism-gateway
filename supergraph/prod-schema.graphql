@@ -16,6 +16,12 @@ directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boole
 
 directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
 
+input ActionDetailsInput
+  @join__type(graph: SCHISM_ENTITY)
+{
+  longName: String!
+}
+
 type Chunk
   @join__type(graph: SCHISM_SERVICE)
 {
@@ -49,8 +55,24 @@ type Entity
   longName: String
   speed: Float
   ownerId: String
-  position: Position
+  position: [Float]
   color: String
+  sightRange: Float
+}
+
+input EntityChangeInput
+  @join__type(graph: SCHISM_ENTITY)
+{
+  path: String!
+  value: String!
+}
+
+input EntityChangeLogInput
+  @join__type(graph: SCHISM_ENTITY)
+{
+  time: Int
+  timeDelta: Int
+  change: [EntityChangeInput]!
 }
 
 input EntityInput
@@ -61,8 +83,9 @@ input EntityInput
   longName: String
   speed: Float
   ownerId: String
-  position: PositionInput
+  position: [Float]
   color: String
+  sightRange: Float
 }
 
 type ErrorAuthentication
@@ -117,12 +140,38 @@ type Mutation
   insertEntity(entity: EntityInput!): Boolean @join__field(graph: SCHISM_ENTITY)
   upsertEntities(entities: [EntityInput]!): [Boolean] @join__field(graph: SCHISM_ENTITY)
   upsertMyEntities(entities: [EntityInput]!): [Boolean] @join__field(graph: SCHISM_ENTITY)
+  myCreateNewEntities(entities: [MyNewEntityInput]!): [Boolean] @join__field(graph: SCHISM_ENTITY)
+  myActionEffect(aE: MyActionEffectInput): Boolean @join__field(graph: SCHISM_ENTITY)
 
   """Create a player"""
   createPlayer(name: String!, password: String!): PlayerResponse @join__field(graph: SCHISM_SERVICE)
 
   """Try to generate an auth token by testing a password"""
   login(name: String!, password: String!): GenerateAuthTokenResponse @join__field(graph: SCHISM_SERVICE)
+}
+
+input MyActionEffectInput
+  @join__type(graph: SCHISM_ENTITY)
+{
+  id: ID!
+  startTime: String!
+  sourceEntityId: ID!
+  targetEntityId: ID!
+  sourceEntityJSON: String!
+  targetEntityJSON: String!
+  changeLog: [EntityChangeLogInput]!
+  actionDetails: ActionDetailsInput
+}
+
+input MyNewEntityInput
+  @join__type(graph: SCHISM_ENTITY)
+{
+  name: String
+  longName: String
+  speed: Float
+  position: [Float]
+  color: String
+  sightRange: Float
 }
 
 """A player"""
@@ -134,6 +183,7 @@ type Player
   gameState: GameState
   authToken: String
   password: String
+  userGroups: [String]!
 }
 
 """Return type for when attempting to create a new player"""
@@ -165,7 +215,7 @@ type Query
   getEntityById(id: ID!): [Entity]! @join__field(graph: SCHISM_ENTITY)
   getEntitiesInChunk(chunk: ChunkInput!): [Entity]! @join__field(graph: SCHISM_ENTITY)
   getEntitiesByOwner(ownerId: ID!): [Entity]! @join__field(graph: SCHISM_ENTITY)
-  getEntitiesNearPosition(position: PositionInput!, range: Int): [Entity]! @join__field(graph: SCHISM_ENTITY)
+  getEntitiesNearPosition(position: [Float], range: Float): [Entity]! @join__field(graph: SCHISM_ENTITY)
   getAllEntities: [Entity]! @join__field(graph: SCHISM_ENTITY)
   getMyEntities: [Entity]! @join__field(graph: SCHISM_ENTITY)
   getEntitiesICanSee: [Entity]! @join__field(graph: SCHISM_ENTITY)

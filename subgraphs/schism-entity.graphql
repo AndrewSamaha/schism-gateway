@@ -11,20 +11,23 @@ type Entity {
   longName: String
   speed: Float
   ownerId: String
-  position: Position
+  position: [Float]
   color: String
+  sightRange: Float
 }
 type Mutation {
   updateEntity(entity: EntityInput!): Boolean
   insertEntity(entity: EntityInput!): Boolean
   upsertEntities(entities: [EntityInput]!): [Boolean]
   upsertMyEntities(entities: [EntityInput]!): [Boolean]
+  myCreateNewEntities(entities: [MyNewEntityInput]!): [Boolean]
+  myActionEffect(aE: MyActionEffectInput): Boolean
 }
 type Query {
   getEntityById(id: ID!): [Entity]!
   getEntitiesInChunk(chunk: ChunkInput!): [Entity]!
   getEntitiesByOwner(ownerId: ID!): [Entity]!
-  getEntitiesNearPosition(position: PositionInput!, range: Int): [Entity]!
+  getEntitiesNearPosition(position: [Float], range: Float): [Entity]!
   getAllEntities: [Entity]!
   getMyEntities: [Entity]!
   getEntitiesICanSee: [Entity]!
@@ -50,8 +53,39 @@ input EntityInput {
   longName: String
   speed: Float
   ownerId: String
-  position: PositionInput
+  position: [Float]
   color: String
+  sightRange: Float
+}
+input MyNewEntityInput {
+  name: String
+  longName: String
+  speed: Float
+  position: [Float]
+  color: String
+  sightRange: Float
+}
+input EntityChangeInput {
+  path: String!
+  value: String!
+}
+input EntityChangeLogInput {
+  time: Int
+  timeDelta: Int
+  change: [EntityChangeInput]!
+}
+input ActionDetailsInput {
+  longName: String!
+}
+input MyActionEffectInput {
+  id: ID!
+  startTime: String!
+  sourceEntityId: ID!
+  targetEntityId: ID!
+  sourceEntityJSON: String!
+  targetEntityJSON: String!
+  changeLog: [EntityChangeLogInput]!
+  actionDetails: ActionDetailsInput
 }
 input PositionInput {
   x: Float
